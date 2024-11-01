@@ -4,8 +4,11 @@ document.addEventListener('DOMContentLoaded', loadApplications);
 // Add event listener for form submission
 document.getElementById('job-application-form').addEventListener('submit', addApplication);
 
-// Add event listener for search
-document.getElementById('search').addEventListener('input', searchApplications);
+// Add event listener for search and filter
+document.getElementById('search').addEventListener('input', filterApplications);
+document.getElementById('filter-status').addEventListener('change', filterApplications);
+
+let editIndex = -1; // Track the index of the application being edited
 
 function loadApplications() {
     const applications = JSON.parse(localStorage.getItem('jobApplications')) || [];
@@ -21,45 +24,79 @@ function addApplication(e) {
     const notes = document.getElementById('notes').value;
 
     const application = { jobTitle, company, deadline, notes, status: 'Applied' };
+
+    let applications = JSON.parse(localStorage.getItem('jobApplications')) || [];
     
-    const applications = JSON.parse(localStorage.getItem('jobApplications')) || [];
-    applications.push(application);
-    localStorage.setItem('jobApplications', JSON.stringify(applications));
+    if (editIndex > -1) {
+        applications[editIndex] = application; // Update existing application
+        editIndex = -1; // Reset index
+    } else {
+        applications.push(application); // Add new application
+    }
 
-    displayApplication(application);
-    document.getElementById('job-application-form').reset();
+    localStorage.setItem('jobApplications', JSON.stringify(applications));
+    clearForm();
+    displayApplications(applications);
 }
 
-function displayApplication(application) {
+function displayApplications(applications) {
     const list = document.getElementById('application-list');
-    const listItem = document.createElement('li');
+    list.innerHTML = ''; // Clear current list
 
-    listItem.innerHTML = `
-        <div>
-            <strong>${application.jobTitle}</strong> at <em>${application.company}</em> 
-            <br> Deadline: ${application.deadline}
-            <br> Notes: ${application.notes}
-            <span class="status applied">${application.status}</span>
-        </div>
-        <button onclick="deleteApplication(this)">Delete</button>
-    `;
+    applications.forEach((application, index) => {
+        const listItem = document.createElement('li');
 
-    list.appendChild(listItem);
+        listItem.innerHTML = `
+            <div>
+                <strong>${application.jobTitle}</strong> at <em>${application.company}</em>
+                <br> Deadline: ${application.deadline}
+                <br> Notes: ${application.notes}
+                <span class="status ${application.status.toLowerCase()}">${application.status}</span>
+            </div>
+            <button class="edit-button" onclick="editApplication(${index})">Edit</button>
+            <button onclick="deleteApplication(${index})">Delete</button>
+        `;
+
+        list.appendChild(listItem);
+    });
 }
 
-function deleteApplication(button) {
-    const listItem = button.parentElement;
-    const jobTitle = listItem.children[0].children[0].textContent; // Extract job title to identify
+function editApplication(index) {
+    const applications = JSON.parse(localStorage.getItem('jobApplications'));
+    const application = applications[index];
+
+    // Fill the form with the application data
+    document.getElementById('job-title').value = application.jobTitle;
+    document.getElementById('company').value = application.company;
+    document.getElementById('deadline').value = application.deadline;
+    document.getElementById('notes').value = application.notes;
+
+    editIndex = index; // Set the index to edit
+}
+
+function deleteApplication(index) {
     let applications = JSON.parse(localStorage.getItem('jobApplications'));
-    applications = applications.filter(app => app.jobTitle !== jobTitle);
+    applications.splice(index, 1); // Remove application
     localStorage.setItem('jobApplications', JSON.stringify(applications));
-    listItem.remove();
+    displayApplications(applications);
 }
 
-function searchApplications() {
-    const query = document.getElementById('search').value.toLowerCase();
-    const applications = JSON.parse(localStorage.getItem('jobApplications')) || [];
-    const filtered = applications.filter(app => app.jobTitle.toLowerCase().includes(query));
-    document.getElementById('application-list').innerHTML = '';
-    filtered.forEach(displayApplication);
+function filterApplications() {
+    const searchQuery = document.getElementById('search').value.toLowerCase();
+    const statusFilter = document.getElementById('filter-status').value;
+
+    let applications = JSON.parse(localStorage.getItem('jobApplications')) || [];
+    
+    // Filter by search and status
+    const filtered = applications.filter(app => {
+        const matchesSearch = app.jobTitle.toLowerCase().includes(searchQuery);
+        const matchesStatus = statusFilter ? app.status === statusFilter : true;
+        return matchesSearch && matchesStatus;
+    });
+
+    displayApplications(filtered);
+}
+
+function clearForm() {
+    document.getElementById('job-application-form').reset(); // Reset form fields
 }

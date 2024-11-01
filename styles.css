@@ -7,7 +7,7 @@ body {
 }
 
 #app {
-    max-width: 500px;
+    max-width: 600px;
     margin: 50px auto;
     background: #ffffff;
     padding: 40px;
@@ -16,7 +16,7 @@ body {
     text-align: center;
 }
 
-h1 {
+h1, h2 {
     color: #003366;
 }
 
@@ -43,4 +43,55 @@ button {
 
 button:hover {
     background-color: #b22234;
+}
+
+/* Application List */
+#application-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+#application-list li {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #e0e6ed;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Status Colors */
+.status {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.applied { background-color: #e7f4e4; color: #2e662f; }
+.interview { background-color: #fff3cd; color: #856404; }
+.rejected { background-color: #f8d7da; color: #721c24; }
+
+/* Additional Styles for Filtering */
+#filter-status {
+    margin: 20px 0;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* Style for edit button */
+.edit-button {
+    background-color: #ffc107; /* Yellow */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.edit-button:hover {
+    background-color: #d39e00; /* Darker yellow on hover */
 }
